@@ -1,0 +1,147 @@
+----------------------------------------------------------------------
+IMAGE PREPROCESSING
+----------------------------------------------------------------------
+preprocessing_accuracy = 0.9975
+
+$ python preprocessing/preprocess.py -m binarized
+
+...
+
+Approved 798 out of 800 images (99%).
+
+Samples summary
+        down  left  right    up  total
+round   1872  1872   1872  1872   7488
+wide    2632  2632   2632  2632  10528
+narrow  1880  1880   1880  1880   7520
+total   6384  6384   6384  6384  25536
+
+Finished!
+----------------------------------------------------------------------
+DATASET SPLITTING
+----------------------------------------------------------------------
+split = 0.90, 0.05, 0.05
+real_split = 0.79, 0.105, 0.105 
+
+$ python operations/make_dataset.py -r 0.9
+
+...
+
+Training set
+        down  left  right    up  total
+round   1684  1684   1684  1684   6736
+wide    1684  1684   1684  1684   6736
+narrow  1684  1684   1684  1684   6736
+total   5052  5052   5052  5052  20208
+
+Validation set
+        down  left  right   up  total
+round     94    94     94   94    376
+wide     474   474    474  474   1896
+narrow    98    98     98   98    392
+total    666   666    666  666   2664
+
+Testing set
+        down  left  right   up  total
+round     94    94     94   94    376
+wide     474   474    474  474   1896
+narrow    98    98     98   98    392
+total    666   666    666  666   2664
+
+Finished!
+----------------------------------------------------------------------
+MODEL TRAINING
+----------------------------------------------------------------------
+$ python model/train.py -m binarized_model128.h5 -b 128
+
+...
+
+Settings
+           value 
+max_epochs   240 
+patience      80 
+batch_size   128 
+
+Creating model...
+
+Creating generators...
+Found 20208 images belonging to 4 classes.
+Found 2664 images belonging to 4 classes.
+
+Fitting model...
+
+...
+
+Epoch 228/240
+ - 28s - loss: 0.0095 - accuracy: 0.9974 - val_loss: 0.0000e+00 - val_accuracy: 0.9945
+
+...
+
+Best epoch: 228
+
+Saving model...
+Model saved to ./model/binarized_model128.h5
+
+Finished!
+----------------------------------------------------------------------
+VALIDATION PERFORMANCE
+----------------------------------------------------------------------
+$ python model/classify.py -m binarized_model128.h5 -d validation
+Processing 2664 file(s) in validation/...
+
+Confusion matrix
+       down  left  right   up
+down    662     0      3    1
+left      0   665      0    1
+right     0     0    666    0
+up        0     1      2  663
+
+Classification summary
+       precision  recall      f1
+down      1.0000  0.9940  0.9970
+left      0.9985  0.9985  0.9985
+right     0.9925  1.0000  0.9962
+up        0.9970  0.9955  0.9962
+
+Accuracy by type
+        correct  incorrect  accuracy
+round       374          2    0.9947
+wide       1892          4    0.9979
+narrow      390          2    0.9949
+total      2656          8    0.9970
+
+Finished!
+----------------------------------------------------------------------
+FINAL PERFORMANCE
+----------------------------------------------------------------------
+$ python model/classify.py -m binarized_model128.h5 -d testing
+Processing 2064 file(s) in testing/...
+
+Confusion matrix
+       down  left  right   up
+down    664     0      2    0
+left      0   665      0    1
+right     0     0    666    0
+up        0     0      1  665
+
+Classification summary
+       precision  recall      f1
+down      1.0000  0.9970  0.9985
+left      1.0000  0.9985  0.9992
+right     0.9955  1.0000  0.9977
+up        0.9985  0.9985  0.9985
+
+Accuracy by type
+        correct  incorrect  accuracy
+round       376          0    1.0000
+wide       1892          4    0.9979
+narrow      392          0    1.0000
+total      2660          4    0.9985
+----------------------------------------------------------
+P(Binarized) = 0.9975 * (0.9985)^4 = 0.9915
+
+normal_test_arrow_accuracy = (1)^4 = 1
+normal_test_rune_accuracy = 20 out of 20
+
+hard_test_arrow_accuracy = (0.9504)^4 = 0.8159
+hard_test_rune_accuracy = 16 out of 20 = 0.8
